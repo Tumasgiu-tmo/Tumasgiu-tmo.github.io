@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ETS Group">
+<meta name="theme-color" content="#080810">
+<title>ETS Group — CRM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#080810; --bg2:#0C0C18; --surface:#0F0F1C; --surface2:#141425;
+  --border:#1C1C30; --border2:#242438;
+  --gold:#C9A96E; --gold-dim:#8B7347; --gold-glow:rgba(201,169,110,0.12);
+  --text:#EDE8E0; --text2:#8B8BA0; --text3:#55556A;
+  --red:#EF4444; --red-bg:rgba(239,68,68,0.1);
+  --orange:#F59E0B; --orange-bg:rgba(245,158,11,0.1);
+  --green:#10B981; --green-bg:rgba(16,185,129,0.1);
+  --safe-top:env(safe-area-inset-top,44px);
+  --safe-bottom:env(safe-area-inset-bottom,34px);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg);color:var(--text);
+  display:flex;flex-direction:column;
+  position:fixed;width:100%;top:0;left:0;
+}
+/* NOISE */
+body::after{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:9999;
+}
+/* HEADER */
+.hdr{
+  padding:calc(var(--safe-top) + 10px) 18px 10px;
+  background:linear-gradient(180deg,#0A0A16 0%,transparent 100%);
+  display:flex;align-items:center;justify-content:space-between;
+  z-index:10;flex-shrink:0;
+}
+.hdr-brand{display:flex;align-items:center;gap:9px}
+.hdr-logo{
+  width:30px;height:30px;
+  background:linear-gradient(135deg,var(--gold),var(--gold-dim));
+  border-radius:7px;display:flex;align-items:center;justify-content:center;
+  font-family:'Cormorant Garamond',serif;font-size:13px;font-weight:600;color:#080810;
+}
+.hdr-name{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:400;letter-spacing:.04em}
+.hdr-name b{color:var(--gold);font-weight:500}
+.hdr-right{display:flex;align-items:center;gap:7px}
+.hdr-date{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);text-align:right;line-height:1.5}
+.hdr-badge{background:var(--gold-glow);border:1px solid var(--gold-dim);color:var(--gold);font-size:9px;font-weight:600;padding:3px 8px;border-radius:20px;font-family:'DM Mono',monospace;letter-spacing:.06em}
+/* PAGES */
+.pages{flex:1;overflow:hidden;position:relative}
+.page{position:absolute;inset:0;overflow-y:auto;padding:0 15px 24px;opacity:0;pointer-events:none;transition:opacity .2s;-webkit-overflow-scrolling:touch}
+.page.active{opacity:1;pointer-events:all}
+.page::-webkit-scrollbar{display:none}
+/* NAV */
+.nav{background:var(--surface);border-top:1px solid var(--border);padding:6px 0 calc(var(--safe-bottom) + 2px);display:flex;flex-shrink:0;z-index:20}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:5px 2px;cursor:pointer;transition:all .2s;border:none;background:none}
+.ni{width:20px;height:20px;color:var(--text3);transition:color .2s}
+.nl{font-size:9px;font-weight:500;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;transition:color .2s}
+.nd{width:3px;height:3px;border-radius:50%;background:var(--gold);opacity:0;transition:opacity .2s;margin-top:1px}
+.nb.active .ni,.nb.active .nl{color:var(--gold)}
+.nb.active .nd{opacity:1}
+/* SECTION HEADER */
+.stitle{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:400;letter-spacing:.02em;padding:14px 0 3px}
+.ssub{font-size:11px;color:var(--text3);margin-bottom:14px;font-weight:300}
+/* HEALTH */
+.health-card{background:var(--surface);border:1px solid var(--border);border-radius:15px;padding:18px;margin-bottom:14px;display:flex;align-items:center;gap:18px;position:relative;overflow:hidden}
+.health-card::before{content:'';position:absolute;top:-20px;right:-20px;width:100px;height:100px;background:radial-gradient(circle,var(--gold-glow) 0%,transparent 70%);pointer-events:none}
+.hring{position:relative;width:68px;height:68px;flex-shrink:0}
+.hring svg{transform:rotate(-90deg)}
+.hring-bg{fill:none;stroke:var(--border2);stroke-width:4}
+.hring-fill{fill:none;stroke:var(--gold);stroke-width:4;stroke-linecap:round;transition:stroke-dashoffset 1.2s ease}
+.hscore{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:15px;font-weight:500;color:var(--gold)}
+.hinfo{flex:1}
+.hlabel{font-size:10px;font-weight:600;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px}
+.hstatus{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:400;margin-bottom:5px}
+.hdetail{font-size:10px;color:var(--text2);line-height:1.5}
+/* KPI GRID */
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:14px}
+.kc{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:13px;cursor:pointer;transition:all .15s;position:relative;overflow:hidden}
+.kc:active{transform:scale(.97)}
+.kc.danger{border-color:rgba(239,68,68,.3);background:linear-gradient(135deg,var(--surface),rgba(239,68,68,.04))}
+.kc.warning{border-color:rgba(245,158,11,.3);background:linear-gradient(135deg,var(--surface),rgba(245,158,11,.04))}
+.ki{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;margin-bottom:9px;font-size:15px}
+.kc.danger .ki{background:var(--red-bg)}
+.kc.warning .ki{background:var(--orange-bg)}
+.kc.ok .ki{background:var(--green-bg)}
+.kc.neutral .ki{background:var(--gold-glow)}
+.kv{font-family:'DM Mono',monospace;font-size:21px;font-weight:500;color:var(--text);line-height:1;margin-bottom:3px}
+.kc.danger .kv{color:var(--red)}
+.kc.warning .kv{color:var(--orange)}
+.kc.ok .kv{color:var(--green)}
+.kc.neutral .kv{color:var(--gold)}
+.kl{font-size:9px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;line-height:1.4}
+.kpulse{position:absolute;top:9px;right:9px;width:7px;height:7px;border-radius:50%;animation:pulse 2s infinite}
+.kc.danger .kpulse{background:var(--red)}
+.kc.warning .kpulse{background:var(--orange)}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.4)}}
+/* ALERTS */
+.al-hdr{display:flex;align-items:center;gap:7px;margin-bottom:9px;margin-top:2px}
+.al-title{font-size:10px;font-weight:600;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;flex:1}
+.al-cnt{background:var(--red-bg);color:var(--red);font-size:9px;font-weight:600;padding:2px 7px;border-radius:20px;font-family:'DM Mono',monospace}
+.al-item{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:11px 13px;margin-bottom:7px;display:flex;align-items:center;gap:11px;cursor:pointer}
+.al-item.red{border-left:3px solid var(--red)}
+.al-item.orange{border-left:3px solid var(--orange)}
+.al-dot{width:7px;height:7px;flex-shrink:0;border-radius:50%}
+.red .al-dot{background:var(--red)}
+.orange .al-dot{background:var(--orange)}
+.al-txt{flex:1}
+.al-main{font-size:12px;font-weight:400;color:var(--text);margin-bottom:2px}
+.al-sub{font-size:10px;color:var(--text3)}
+/* SEARCH & FILTERS */
+.list-hdr{display:flex;align-items:center;gap:8px;margin-bottom:10px;margin-top:2px}
+.srch{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:9px 12px;font-size:13px;color:var(--text);font-family:'DM Sans',sans-serif;outline:none}
+.srch::placeholder{color:var(--text3)}
+.srch:focus{border-color:var(--gold-dim)}
+.add-btn{width:36px;height:36px;background:var(--gold);border:none;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:18px;color:#080810;font-weight:700;transition:all .2s}
+.add-btn:active{transform:scale(.9)}
+.chips{display:flex;gap:5px;margin-bottom:11px;overflow-x:auto;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{background:var(--surface2);border:1px solid var(--border);color:var(--text2);font-size:10px;font-weight:500;padding:5px 11px;border-radius:20px;white-space:nowrap;cursor:pointer;transition:all .2s;letter-spacing:.04em}
+.chip.active{background:var(--gold-glow);border-color:var(--gold-dim);color:var(--gold)}
+/* CLIENT CARD */
+.cc{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:13px;margin-bottom:9px;display:flex;align-items:center;gap:11px;cursor:pointer;transition:all .15s}
+.cc:active{transform:scale(.99)}
+.cav{width:38px;height:38px;flex-shrink:0;border-radius:9px;background:var(--gold-glow);border:1px solid var(--gold-dim);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:600;color:var(--gold);text-transform:uppercase}
+.ci{flex:1}
+.cn{font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px}
+.cm{font-size:10px;color:var(--text3)}
+.sbadge{font-size:9px;font-weight:600;padding:3px 8px;border-radius:20px;letter-spacing:.05em;text-transform:uppercase;font-family:'DM Mono',monospace;white-space:nowrap}
+.s-actif{background:var(--green-bg);color:var(--green)}
+.s-attente{background:var(--orange-bg);color:var(--orange)}
+.s-prospect{background:var(--gold-glow);color:var(--gold)}
+.s-inactif{background:rgba(100,100,120,.12);color:var(--text3)}
+/* INTERVENTION */
+.ic{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:13px;margin-bottom:9px;cursor:pointer;transition:all .15s}
+.ic:active{transform:scale(.99)}
+.ic-top{display:flex;align-items:center;gap:9px;margin-bottom:8px}
+.ic-date{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:5px 9px;text-align:center;flex-shrink:0}
+.id-day{font-family:'DM Mono',monospace;font-size:16px;font-weight:500;color:var(--gold);line-height:1}
+.id-mon{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-top:2px}
+.ic-info{flex:1}
+.ic-cli{font-size:13px;font-weight:500;color:var(--text)}
+.ic-type{font-size:10px;color:var(--text3);margin-top:2px}
+.ic-ft{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border);padding-top:7px}
+.ic-addr{font-size:10px;color:var(--text3)}
+.ic-price{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:var(--gold)}
+/* STOCK */
+.sc{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:13px;margin-bottom:9px;cursor:pointer;transition:all .15s}
+.sc:active{transform:scale(.99)}
+.sc.critical{border-left:3px solid var(--red)}
+.sc.low{border-left:3px solid var(--orange)}
+.sc-top{display:flex;align-items:flex-start;gap:9px;margin-bottom:9px}
+.sc-ico{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.sc.critical .sc-ico{background:var(--red-bg)}
+.sc.low .sc-ico{background:var(--orange-bg)}
+.sc.ok .sc-ico{background:var(--green-bg)}
+.sc-info{flex:1}
+.sc-name{font-size:12px;font-weight:500;color:var(--text);margin-bottom:2px}
+.sc-cat{font-size:10px;color:var(--text3)}
+.sc-bar-w{background:var(--border);border-radius:3px;height:3px;overflow:hidden;margin-bottom:7px}
+.sc-bar{height:100%;border-radius:3px;transition:width .5s}
+.sc.critical .sc-bar{background:var(--red)}
+.sc.low .sc-bar{background:var(--orange)}
+.sc.ok .sc-bar{background:var(--green)}
+.sc-ft{display:flex;align-items:center;justify-content:space-between}
+.sc-qty{font-family:'DM Mono',monospace;font-size:11px;color:var(--text2)}
+.sc-btn{background:transparent;border:1px solid var(--border2);color:var(--text2);font-size:10px;font-weight:500;padding:4px 9px;border-radius:7px;cursor:pointer;font-family:'DM Sans',sans-serif}
+.sc.critical .sc-btn{border-color:var(--red);color:var(--red)}
+.sc.low .sc-btn{border-color:var(--orange);color:var(--orange)}
+/* PIPELINE */
+.pipe-hdr{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:14px;margin-bottom:14px;display:flex;gap:0}
+.ps{flex:1;text-align:center}
+.psv{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;color:var(--gold);display:block}
+.psl{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-top:2px}
+.psdiv{width:1px;background:var(--border);margin:0 4px}
+.pc{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:13px;margin-bottom:9px;cursor:pointer;transition:all .15s}
+.pc:active{transform:scale(.99)}
+.pc-top{display:flex;align-items:flex-start;gap:9px;margin-bottom:9px}
+.pc-info{flex:1}
+.pc-co{font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px}
+.pc-svc{font-size:10px;color:var(--text3)}
+.pc-note{font-size:10px;color:var(--text3);font-style:italic;margin-top:3px}
+.pc-val{font-family:'DM Mono',monospace;font-size:14px;font-weight:500;color:var(--gold);white-space:nowrap}
+.pc-ft{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border);padding-top:7px}
+.pc-last{font-size:10px;color:var(--text3)}
+.stage{font-size:9px;font-weight:600;padding:3px 7px;border-radius:20px;letter-spacing:.04em;font-family:'DM Mono',monospace}
+.st1{background:rgba(99,102,241,.15);color:#818CF8}
+.st2{background:var(--orange-bg);color:var(--orange)}
+.st3{background:var(--gold-glow);color:var(--gold)}
+.st4{background:var(--green-bg);color:var(--green)}
+/* AI FAB */
+.ai-fab{position:fixed;bottom:calc(var(--safe-bottom) + 68px);right:15px;width:48px;height:48px;background:linear-gradient(135deg,var(--gold),#8B6B3D);border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 18px rgba(201,169,110,.4);z-index:100;transition:all .2s;font-size:18px;color:#080810}
+.ai-fab:active{transform:scale(.88)}
+.ai-fab.hidden{opacity:0;pointer-events:none}
+/* AI PANEL */
+.ai-bd{position:fixed;inset:0;background:rgba(8,8,16,.82);z-index:190;opacity:0;pointer-events:none;transition:opacity .3s;backdrop-filter:blur(5px)}
+.ai-bd.open{opacity:1;pointer-events:all}
+.ai-panel{position:fixed;bottom:0;left:0;right:0;height:72vh;background:var(--surface);border-top:1px solid var(--border);border-radius:18px 18px 0 0;z-index:200;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);padding-bottom:var(--safe-bottom)}
+.ai-panel.open{transform:translateY(0)}
+.ai-handle{width:32px;height:3px;background:var(--border2);border-radius:2px;position:absolute;top:7px;left:50%;transform:translateX(-50%)}
+.ai-hdr{padding:14px 15px 9px;display:flex;align-items:center;gap:9px;border-bottom:1px solid var(--border);flex-shrink:0}
+.ai-av{width:30px;height:30px;background:linear-gradient(135deg,var(--gold),#8B6B3D);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;color:#080810;font-weight:700}
+.ai-ttl{font-size:13px;font-weight:600;color:var(--text)}
+.ai-stl{font-size:9px;color:var(--text3)}
+.ai-x{background:var(--surface2);border:1px solid var(--border);border-radius:7px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);font-size:14px;margin-left:auto}
+.ai-msgs{flex:1;overflow-y:auto;padding:10px 14px;display:flex;flex-direction:column;gap:9px;scroll-behavior:smooth}
+.ai-msgs::-webkit-scrollbar{display:none}
+.ai-qa{display:flex;gap:5px;flex-wrap:wrap;padding:0 14px 8px;flex-shrink:0}
+.qc{background:var(--surface2);border:1px solid var(--border2);color:var(--text2);font-size:10px;padding:5px 10px;border-radius:20px;cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif}
+.qc:active{background:var(--gold-glow);border-color:var(--gold-dim);color:var(--gold)}
+.ai-inp-row{display:flex;gap:7px;padding:8px 14px 6px;border-top:1px solid var(--border);flex-shrink:0}
+.ai-inp{flex:1;background:var(--surface2);border:1px solid var(--border2);border-radius:11px;padding:9px 11px;font-size:13px;color:var(--text);font-family:'DM Sans',sans-serif;outline:none;resize:none;max-height:75px}
+.ai-inp::placeholder{color:var(--text3)}
+.ai-inp:focus{border-color:var(--gold-dim)}
+.ai-send{width:38px;height:38px;background:var(--gold);border:none;border-radius:9px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;align-self:flex-end;transition:all .2s}
+.ai-send:active{transform:scale(.88)}
+.ai-send:disabled{opacity:.35}
+.msg{display:flex;max-width:92%}
+.msg.u{align-self:flex-end;flex-direction:row-reverse}
+.msg.a{align-self:flex-start}
+.mb{padding:9px 12px;border-radius:13px;font-size:12px;line-height:1.55}
+.msg.a .mb{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-bottom-left-radius:3px}
+.msg.u .mb{background:var(--gold-glow);border:1px solid var(--gold-dim);color:var(--text);border-bottom-right-radius:3px}
+.dl{display:flex;gap:4px;align-items:center;padding:4px 0}
+.dd{width:5px;height:5px;border-radius:50%;background:var(--text3);animation:db 1s infinite}
+.dd:nth-child(2){animation-delay:.15s}
+.dd:nth-child(3){animation-delay:.3s}
+@keyframes db{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+/* MODAL */
+.m-bd{position:fixed;inset:0;background:rgba(8,8,16,.88);z-index:300;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(6px)}
+.m-bd.open{opacity:1;pointer-events:all}
+.modal{background:var(--surface);border-top:1px solid var(--border);border-radius:18px 18px 0 0;width:100%;padding:18px 18px calc(var(--safe-bottom) + 18px);transform:translateY(20px);transition:transform .25s}
+.m-bd.open .modal{transform:translateY(0)}
+.m-title{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:400;margin-bottom:3px}
+.m-sub{font-size:11px;color:var(--text3);margin-bottom:18px}
+.ff{margin-bottom:12px}
+.fl{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;display:block}
+.fi{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:9px;padding:10px 11px;font-size:13px;color:var(--text);font-family:'DM Sans',sans-serif;outline:none}
+.fi:focus{border-color:var(--gold-dim)}
+.btn-p{width:100%;background:var(--gold);color:#080810;font-size:13px;font-weight:700;padding:12px;border:none;border-radius:11px;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:6px}
+.btn-p:active{transform:scale(.98)}
+.btn-s{width:100%;background:transparent;color:var(--text2);font-size:12px;padding:9px;border:1px solid var(--border2);border-radius:11px;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:5px}
+/* EMPTY */
+.empty{text-align:center;padding:36px 20px}
+.eico{font-size:32px;margin-bottom:10px;opacity:.45}
+.etxt{font-size:13px;color:var(--text3)}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-brand">
+    <div class="hdr-logo">ET</div>
+    <div class="hdr-name">ETS <b>Group</b></div>
+  </div>
+  <div class="hdr-right">
+    <div class="hdr-date" id="hdrDate"></div>
+    <div class="hdr-badge">Tumasgiu</div>
+  </div>
+</div>
+
+<div class="pages">
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="page-dashboard">
+    <div class="stitle">Dashboard</div>
+    <div class="ssub">Hub centralisé — ETS Group</div>
+    <div class="health-card">
+      <div class="hring">
+        <svg width="68" height="68" viewBox="0 0 68 68">
+          <circle class="hring-bg" cx="34" cy="34" r="28"/>
+          <circle class="hring-fill" id="hringFill" cx="34" cy="34" r="28" stroke-dasharray="175.9" stroke-dashoffset="175.9"/>
+        </svg>
+        <div class="hscore" id="hscoreEl">—</div>
+      </div>
+      <div class="hinfo">
+        <div class="hlabel">Santé Globale</div>
+        <div class="hstatus" id="hstatusEl">Analyse...</div>
+        <div class="hdetail" id="hdetailEl">Chargement...</div>
+      </div>
+    </div>
+    <div class="kpi-grid" id="kpiGrid"></div>
+    <div class="al-hdr">
+      <div class="al-title">Alertes actives</div>
+      <div class="al-cnt" id="alCnt">0</div>
+    </div>
+    <div id="alList"></div>
+  </div>
+
+  <!-- CLIENTS -->
+  <div class="page" id="page-clients">
+    <div class="stitle">Clients</div>
+    <div class="list-hdr">
+      <input class="srch" placeholder="Rechercher..." id="cliSearch" oninput="renderClients()">
+      <button class="add-btn" onclick="openModal('m-addcli')">+</button>
+    </div>
+    <div class="chips" id="cliChips">
+      <div class="chip active" onclick="setFilter('cli','tous',this)">Tous</div>
+      <div class="chip" onclick="setFilter('cli','actif',this)">Actifs</div>
+      <div class="chip" onclick="setFilter('cli','prospect',this)">Prospects</div>
+      <div class="chip" onclick="setFilter('cli','attente',this)">En attente</div>
+    </div>
+    <div id="cliList"></div>
+  </div>
+
+  <!-- INTERVENTIONS -->
+  <div class="page" id="page-interventions">
+    <div class="stitle">Interventions</div>
+    <div class="list-hdr">
+      <input class="srch" placeholder="Rechercher..." id="intSearch" oninput="renderInt()">
+      <button class="add-btn" onclick="openAddInt()">+</button>
+    </div>
+    <div class="chips" id="intChips">
+      <div class="chip active" onclick="setFilter('int','tous',this)">Toutes</div>
+      <div class="chip" onclick="setFilter('int','planifié',this)">Planifiées</div>
+      <div class="chip" onclick="setFilter('int','urgent',this)">Urgentes</div>
+      <div class="chip" onclick="setFilter('int','terminé',this)">Terminées</div>
+    </div>
+    <div id="intList"></div>
+  </div>
+
+  <!-- STOCKS -->
+  <div class="page" id="page-stocks">
+    <div class="stitle">Stocks & Matériel</div>
+    <div class="chips" id="stkChips">
+      <div class="chip active" onclick="setFilter('stk','tous',this)">Tout</div>
+      <div class="chip" onclick="setFilter('stk','critique',this)">⚠ Critique</div>
+      <div class="chip" onclick="setFilter('stk','bas',this)">↓ Bas</div>
+      <div class="chip" onclick="setFilter('stk','panne',this)">🔧 Panne</div>
+      <div class="chip" onclick="setFilter('stk','ok',this)">✓ OK</div>
+    </div>
+    <div id="stkList"></div>
+  </div>
+
+  <!-- PIPELINE -->
+  <div class="page" id="page-pipeline">
+    <div class="stitle">Pipeline Cintu</div>
+    <div class="pipe-hdr" id="pipeStats"></div>
+    <div class="chips" id="pipeChips">
+      <div class="chip active" onclick="setFilter('pipe','tous',this)">Tous</div>
+      <div class="chip" onclick="setFilter('pipe','contact',this)">Contact</div>
+      <div class="chip" onclick="setFilter('pipe','devis',this)">Devis</div>
+      <div class="chip" onclick="setFilter('pipe','négociation',this)">Négoc.</div>
+      <div class="chip" onclick="setFilter('pipe','gagné',this)">Gagné</div>
+    </div>
+    <div id="pipeList"></div>
+  </div>
+
+</div>
+
+<nav class="nav">
+  <button class="nb active" onclick="goPage('dashboard',this)">
+    <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+    <div class="nl">Hub</div><div class="nd"></div>
+  </button>
+  <button class="nb" onclick="goPage('clients',this)">
+    <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="7" r="3.5"/><circle cx="17" cy="9" r="2.5"/><path d="M2 20c0-4 3.1-6 7-6s7 2 7 6"/><path d="M17 13c2.2.3 4 1.8 4 4.5"/></svg>
+    <div class="nl">Clients</div><div class="nd"></div>
+  </button>
+  <button class="nb" onclick="goPage('interventions',this)">
+    <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2.5"/><path d="M16 2v4M8 2v4M3 10h18"/><circle cx="9" cy="15" r="1.2"/><circle cx="15" cy="15" r="1.2"/></svg>
+    <div class="nl">Agenda</div><div class="nd"></div>
+  </button>
+  <button class="nb" onclick="goPage('stocks',this)">
+    <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 8L12 3 3 8v8l9 5 9-5V8z"/><path d="M12 3v18M3 8l9 5M21 8l-9 5"/></svg>
+    <div class="nl">Stocks</div><div class="nd"></div>
+  </button>
+  <button class="nb" onclick="goPage('pipeline',this)">
+    <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="3 17 8 12 13 15 21 7"/><polyline points="15 7 21 7 21 13"/></svg>
+    <div class="nl">Pipeline</div><div class="nd"></div>
+  </button>
+</nav>
+
+<button class="ai-fab" onclick="openAI()" id="aiFab">✦</button>
+
+<div class="ai-bd" id="aiBd" onclick="closeAI()"></div>
+<div class="ai-panel" id="aiPanel">
+  <div class="ai-handle"></div>
+  <div class="ai-hdr">
+    <div class="ai-av">✦</div>
+    <div style="flex:1">
+      <div class="ai-ttl">Assistant ETS</div>
+      <div class="ai-stl">Alimenté par Claude · Données temps réel</div>
+    </div>
+    <button class="ai-x" onclick="closeAI()">✕</button>
+  </div>
+  <div class="ai-msgs" id="aiMsgs">
+    <div class="msg a"><div class="mb">Bonjour Tumasgiu. Je suis connecté à tes données ETS Group en temps réel.<br><br>Clients, interventions, stocks, pipeline Cintu — je vois tout. Comment puis-je t'aider ?</div></div>
+  </div>
+  <div class="ai-qa">
+    <div class="qc" onclick="sendQ('Quelles sont mes alertes prioritaires à traiter maintenant ?')">🔴 Alertes</div>
+    <div class="qc" onclick="sendQ('Analyse mon pipeline Cintu. Qui relancer en priorité ?')">📊 Pipeline</div>
+    <div class="qc" onclick="sendQ('Rédige un email de relance pour mon prospect le plus chaud.')">✉ Email relance</div>
+    <div class="qc" onclick="sendQ('Quels stocks dois-je commander en urgence ?')">📦 Stocks urgents</div>
+  </div>
+  <div class="ai-inp-row">
+    <textarea class="ai-inp" id="aiInp" placeholder="Pose ta question..." rows="1"
+      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAI()}"
+      oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,75)+'px'"></textarea>
+    <button class="ai-send" id="aiSend" onclick="sendAI()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#080810" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- MODAL ADD CLIENT -->
+<div class="m-bd" id="m-addcli">
+  <div class="modal">
+    <div class="m-title">Nouveau client</div>
+    <div class="m-sub">Ajouter à la base ETS Group</div>
+    <div class="ff"><label class="fl">Nom</label><input class="fi" id="nc-name" placeholder="Jean-Pierre Rossi"></div>
+    <div class="ff"><label class="fl">Entreprise / Propriété</label><input class="fi" id="nc-co" placeholder="Villa Les Oliviers"></div>
+    <div class="ff"><label class="fl">Téléphone</label><input class="fi" id="nc-tel" placeholder="06 XX XX XX XX" type="tel"></div>
+    <div class="ff"><label class="fl">Zone</label><input class="fi" id="nc-zone" placeholder="Porto-Vecchio"></div>
+    <div class="ff"><label class="fl">Statut</label>
+      <select class="fi" id="nc-stat"><option value="prospect">Prospect</option><option value="actif">Client actif</option><option value="attente">En attente</option></select>
+    </div>
+    <button class="btn-p" onclick="addClient()">Ajouter</button>
+    <button class="btn-s" onclick="closeModal('m-addcli')">Annuler</button>
+  </div>
+</div>
+
+<!-- MODAL ADD INTERVENTION -->
+<div class="m-bd" id="m-addint">
+  <div class="modal">
+    <div class="m-title">Nouvelle intervention</div>
+    <div class="m-sub">Planifier une prestation ETS Entretien</div>
+    <div class="ff"><label class="fl">Client</label><select class="fi" id="ni-cli"></select></div>
+    <div class="ff"><label class="fl">Type de prestation</label>
+      <select class="fi" id="ni-type">
+        <option>Nettoyage résidentiel</option><option>Entretien jardin / espaces verts</option>
+        <option>Nettoyage commercial</option><option>Détailing automobile</option>
+        <option>Maintenance générale</option><option>Urgence</option>
+      </select>
+    </div>
+    <div class="ff"><label class="fl">Date</label><input class="fi" id="ni-date" type="date"></div>
+    <div class="ff"><label class="fl">Montant HT (€)</label><input class="fi" id="ni-price" type="number" placeholder="180"></div>
+    <button class="btn-p" onclick="addInt()">Planifier</button>
+    <button class="btn-s" onclick="closeModal('m-addint')">Annuler</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════
+// CONFIG — COLLE TA CLÉ ICI
+// ═══════════════════════════════════
+const API_KEY = '';
+
+// ═══════════════════════════════════
+// DATA INITIALE
+// ═══════════════════════════════════
+const SEED = {
+  clients:[
+    {id:1,name:"Mme. Rossi",co:"Villa Les Palmiers",tel:"06 12 34 56 78",status:"actif",zone:"Porto-Vecchio",last:"2026-03-10"},
+    {id:2,name:"M. Lefevre",co:"Résidence Acqua Bella",tel:"06 23 45 67 89",status:"actif",zone:"Bonifacio",last:"2026-03-12"},
+    {id:3,name:"Domaine Alicia",co:"4 villas — Propriétaire",tel:"06 34 56 78 90",status:"actif",zone:"Lecci",last:"2026-03-08"},
+    {id:4,name:"Mme. Tumeo",co:"Résidence familiale",tel:"—",status:"actif",zone:"Alistro",last:"2026-03-14"},
+    {id:5,name:"SCI Cala Rossa",co:"3 appartements",tel:"06 45 67 89 01",status:"attente",zone:"Porto-Vecchio",last:"2026-02-20"},
+    {id:6,name:"Hôtel Palombaggia",co:"Hôtellerie premium",tel:"04 95 XX XX XX",status:"prospect",zone:"Porto-Vecchio",last:"2026-03-01"},
+    {id:7,name:"Garage Mattei",co:"Auto service",tel:"",status:"prospect",zone:"Ajaccio",last:"2026-03-05"},
+  ],
+  interventions:[
+    {id:1,cliId:1,cli:"Mme. Rossi",type:"Nettoyage résidentiel",date:"2026-03-17",status:"planifié",price:180,addr:"Villa Les Palmiers, Porto-Vecchio"},
+    {id:2,cliId:2,cli:"M. Lefevre",type:"Entretien jardin",date:"2026-03-15",status:"urgent",price:220,addr:"Résidence Acqua Bella, Bonifacio"},
+    {id:3,cliId:3,cli:"Domaine Alicia",type:"Nettoyage résidentiel",date:"2026-03-16",status:"planifié",price:450,addr:"Domaine Alicia, Lecci"},
+    {id:4,cliId:4,cli:"Mme. Tumeo",type:"Entretien jardin",date:"2026-03-14",status:"terminé",price:0,addr:"Alistro"},
+    {id:5,cliId:1,cli:"Mme. Rossi",type:"Nettoyage résidentiel",date:"2026-03-24",status:"planifié",price:180,addr:"Villa Les Palmiers"},
+    {id:6,cliId:5,cli:"SCI Cala Rossa",type:"Nettoyage commercial",date:"2026-03-20",status:"planifié",price:320,addr:"Porto-Vecchio"},
+  ],
+  stocks:[
+    {id:1,name:"Détergent multi-surfaces Pro",cat:"Consommables",qty:2,min:5,unit:"L",ico:"🧴",type:"conso"},
+    {id:2,name:"Serpillières microfibre",cat:"Consommables",qty:1,min:6,unit:"pcs",ico:"🧹",type:"conso"},
+    {id:3,name:"Gants nitrile M",cat:"EPI",qty:30,min:50,unit:"pcs",ico:"🧤",type:"conso"},
+    {id:4,name:"Sacs poubelle 110L",cat:"Consommables",qty:40,min:30,unit:"pcs",ico:"🗑",type:"conso"},
+    {id:5,name:"Décapant WC Pro",cat:"Chimie",qty:3,min:4,unit:"flacons",ico:"💧",type:"conso"},
+    {id:6,name:"Huile moteur tondeuse",cat:"Matériel",qty:0,min:1,unit:"L",ico:"🛢",type:"conso"},
+    {id:7,name:"BlackStone CSB70L 7CV",cat:"Broyeur",ico:"⚙️",type:"mat",ok:true},
+    {id:8,name:"Graco Magnum A60",cat:"Pulvérisateur HP",ico:"🔫",type:"mat",ok:true},
+    {id:9,name:"BlackDecker BCBLV3625I1",cat:"Souffleur",ico:"💨",type:"mat",ok:false,panne:"Batterie défectueuse — depuis 12/03"},
+    {id:10,name:"Tondeuse BlackStone SP480 Dlx",cat:"Tonte",ico:"🌿",type:"mat",ok:false,panne:"Lame à remplacer — commande en attente"},
+  ],
+  pipeline:[
+    {id:1,co:"Hôtel Palombaggia",svc:"Site web + Identité visuelle",val:4500,stage:"devis",last:"Devis envoyé le 10/03",note:"Attend validation actionnaire"},
+    {id:2,co:"Immobilier Corse Premium",svc:"Campagne print + digital",val:2800,stage:"négociation",last:"RDV tél. 12/03",note:"Budget serré, motivé"},
+    {id:3,co:"Restaurant A Cantina",svc:"Refonte logo + cartes",val:950,stage:"contact",last:"Premier message 08/03",note:"Réseau Armand"},
+    {id:4,co:"SCI Les Calanques",svc:"Site + Photos",val:3200,stage:"contact",last:"Rencontre réseau 05/03",note:"Fort potentiel"},
+    {id:5,co:"Garage Mattei",svc:"CRM IA + Intranet",val:2500,stage:"devis",last:"Présentation faite 11/03",note:"Nouveau produit Cintu"},
+    {id:6,co:"Résidence U Sognu",svc:"Contrat entretien annuel",val:7200,stage:"négociation",last:"Offre soumise 08/03",note:"Gros contrat — priorité max"},
+  ]
+};
+
+let D = JSON.parse(localStorage.getItem('ets_v2')||'null') || JSON.parse(JSON.stringify(SEED));
+const save = () => localStorage.setItem('ets_v2', JSON.stringify(D));
+let F = {cli:'tous',int:'tous',stk:'tous',pipe:'tous'};
+let aiHist = [];
+
+// ═══════════════════════════════════
+// NAV
+// ═══════════════════════════════════
+function goPage(name, el) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  el.classList.add('active');
+  const renders = {clients:renderClients,interventions:renderInt,stocks:renderStk,pipeline:renderPipe};
+  if(renders[name]) renders[name]();
+}
+
+function setFilter(mod, val, el) {
+  F[mod] = val;
+  const chips = document.getElementById(mod+'Chips') || document.querySelector('#page-'+({cli:'clients',int:'interventions',stk:'stocks',pipe:'pipeline'}[mod])+' .chips');
+  if(chips) chips.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  const renders = {cli:renderClients,int:renderInt,stk:renderStk,pipe:renderPipe};
+  if(renders[mod]) renders[mod]();
+}
+
+// ═══════════════════════════════════
+// HEADER
+// ═══════════════════════════════════
+function initHeader() {
+  const now = new Date();
+  const days = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+  const months = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+  document.getElementById('hdrDate').innerHTML = `${days[now.getDay()]} ${now.getDate()} ${months[now.getMonth()]}<br>${now.getFullYear()}`;
+}
+
+// ═══════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════
+function renderDash() {
+  const crit = D.stocks.filter(s=>s.type==='conso'&&s.qty<s.min);
+  const pannes = D.stocks.filter(s=>s.type==='mat'&&!s.ok);
+  const urgents = D.interventions.filter(i=>i.status==='urgent');
+  const now = new Date(), weekEnd = new Date(now); weekEnd.setDate(now.getDate()+7);
+  const thisWeek = D.interventions.filter(i=>{ const d=new Date(i.date); return d>=now&&d<=weekEnd; });
+  const active = D.clients.filter(c=>c.status==='actif');
+  const pipeTotal = D.pipeline.reduce((s,p)=>s+p.val,0);
+  const pipeHot = D.pipeline.filter(p=>p.stage==='négociation'||p.stage==='devis');
+  const alertN = crit.length + pannes.length + urgents.length;
+  let score = Math.max(30, 100 - crit.length*12 - pannes.length*8 - urgents.length*15);
+  const offset = 175.9 - (175.9 * score / 100);
+  setTimeout(() => {
+    document.getElementById('hringFill').style.strokeDashoffset = offset;
+    document.getElementById('hscoreEl').textContent = score + '%';
+  }, 200);
+  document.getElementById('hstatusEl').textContent = score>=80?'Bonne forme':score>=60?'Attention requise':'Situation critique';
+  document.getElementById('hdetailEl').textContent = `${alertN} alerte${alertN>1?'s':''} · ${active.length} clients actifs · ${thisWeek.length} intervention${thisWeek.length>1?'s':''} cette semaine`;
+  document.getElementById('alCnt').textContent = alertN;
+  const kpis = [
+    {ico:'📅',v:thisWeek.length,l:'Interventions\nsemaine',s:urgents.length>0?'danger':'ok'},
+    {ico:'👥',v:active.length,l:'Clients\nactifs',s:'neutral'},
+    {ico:'📦',v:crit.length,l:'Stocks\ncritiques',s:crit.length>0?'danger':'ok'},
+    {ico:'🔧',v:pannes.length,l:'Pannes\nmatériel',s:pannes.length>0?'warning':'ok'},
+    {ico:'💰',v:(pipeTotal/1000).toFixed(1)+'K€',l:'Pipeline\nCintu',s:'neutral'},
+    {ico:'🔥',v:pipeHot.length,l:'Devis /\nnégoc.',s:pipeHot.length>0?'warning':'ok'},
+  ];
+  document.getElementById('kpiGrid').innerHTML = kpis.map(k=>`
+    <div class="kc ${k.s}">
+      ${k.s==='danger'||k.s==='warning'?'<div class="kpulse"></div>':''}
+      <div class="ki">${k.ico}</div>
+      <div class="kv">${k.v}</div>
+      <div class="kl">${k.l.replace('\n','<br>')}</div>
+    </div>`).join('');
+  const alerts = [
+    ...crit.map(s=>({lv:'red',main:`Stock critique : ${s.name}`,sub:`${s.qty} ${s.unit} restant (min: ${s.min})`})),
+    ...pannes.map(s=>({lv:'orange',main:`Panne : ${s.name}`,sub:s.panne||'Vérification requise'})),
+    ...urgents.map(i=>({lv:'red',main:`Urgence : ${i.cli}`,sub:`${i.type} — ${fmtDate(i.date)}`})),
+  ];
+  document.getElementById('alList').innerHTML = alerts.length===0
+    ? '<div class="empty"><div class="eico">✅</div><div class="etxt">Aucune alerte — tout est sous contrôle</div></div>'
+    : alerts.map(a=>`<div class="al-item ${a.lv}"><div class="al-dot"></div><div class="al-txt"><div class="al-main">${a.main}</div><div class="al-sub">${a.sub}</div></div><span style="color:var(--text3)">›</span></div>`).join('');
+}
+
+// ═══════════════════════════════════
+// CLIENTS
+// ═══════════════════════════════════
+function renderClients() {
+  const q = (document.getElementById('cliSearch')?.value||'').toLowerCase();
+  let list = D.clients.filter(c=>F.cli==='tous'||c.status===F.cli).filter(c=>!q||c.name.toLowerCase().includes(q)||(c.co||'').toLowerCase().includes(q));
+  const el = document.getElementById('cliList');
+  el.innerHTML = list.length===0
+    ? '<div class="empty"><div class="eico">👥</div><div class="etxt">Aucun client trouvé</div></div>'
+    : list.map(c=>`<div class="cc"><div class="cav">${c.name.charAt(0)}</div><div class="ci"><div class="cn">${c.name}</div><div class="cm">${c.co||''} ${c.zone?'· '+c.zone:''}</div></div><span class="sbadge s-${c.status}">${c.status}</span></div>`).join('');
+}
+
+function addClient() {
+  const name=document.getElementById('nc-name').value.trim(); if(!name)return;
+  D.clients.push({id:Date.now(),name,co:document.getElementById('nc-co').value,tel:document.getElementById('nc-tel').value,zone:document.getElementById('nc-zone').value,status:document.getElementById('nc-stat').value,last:new Date().toISOString().split('T')[0]});
+  save(); closeModal('m-addcli'); renderClients(); renderDash();
+  ['nc-name','nc-co','nc-tel','nc-zone'].forEach(id=>document.getElementById(id).value='');
+}
+
+// ═══════════════════════════════════
+// INTERVENTIONS
+// ═══════════════════════════════════
+function renderInt() {
+  const q = (document.getElementById('intSearch')?.value||'').toLowerCase();
+  let list = [...D.interventions].sort((a,b)=>new Date(a.date)-new Date(b.date)).filter(i=>F.int==='tous'||i.status===F.int).filter(i=>!q||i.cli.toLowerCase().includes(q)||i.type.toLowerCase().includes(q));
+  const MON=['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+  const el=document.getElementById('intList');
+  el.innerHTML = list.length===0
+    ? '<div class="empty"><div class="eico">📅</div><div class="etxt">Aucune intervention</div></div>'
+    : list.map(i=>{
+      const d=new Date(i.date);
+      const sb=i.status==='urgent'?`<span class="sbadge" style="background:var(--red-bg);color:var(--red)">URGENT</span>`:i.status==='terminé'?`<span class="sbadge s-actif">Terminé</span>`:`<span class="sbadge s-prospect">Planifié</span>`;
+      return `<div class="ic"><div class="ic-top"><div class="ic-date"><div class="id-day">${d.getDate()}</div><div class="id-mon">${MON[d.getMonth()]}</div></div><div class="ic-info"><div class="ic-cli">${i.cli}</div><div class="ic-type">${i.type}</div></div>${sb}</div><div class="ic-ft"><div class="ic-addr">📍 ${i.addr||'—'}</div><div class="ic-price">${i.price>0?i.price+' €':'Interne'}</div></div></div>`;
+    }).join('');
+}
+
+function openAddInt() {
+  document.getElementById('ni-cli').innerHTML = D.clients.filter(c=>c.status==='actif').map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+  document.getElementById('ni-date').value = new Date().toISOString().split('T')[0];
+  openModal('m-addint');
+}
+
+function addInt() {
+  const cliId=parseInt(document.getElementById('ni-cli').value), cli=D.clients.find(c=>c.id===cliId);
+  D.interventions.push({id:Date.now(),cliId,cli:cli?.name||'',type:document.getElementById('ni-type').value,date:document.getElementById('ni-date').value,status:'planifié',price:parseInt(document.getElementById('ni-price').value)||0,addr:cli?.zone||''});
+  save(); closeModal('m-addint'); renderInt(); renderDash();
+}
+
+// ═══════════════════════════════════
+// STOCKS
+// ═══════════════════════════════════
+function stState(s) {
+  if(s.type==='mat') return s.ok?'ok':'panne';
+  if(s.qty===0||s.qty<s.min) return 'critique';
+  if(s.qty<s.min*1.5) return 'bas';
+  return 'ok';
+}
+
+function renderStk() {
+  let list = D.stocks;
+  const fMap={critique:'critique',bas:'bas',panne:'panne',ok:'ok'};
+  if(F.stk!=='tous') list=list.filter(s=>stState(s)===fMap[F.stk]);
+  const el=document.getElementById('stkList');
+  el.innerHTML = list.length===0
+    ? '<div class="empty"><div class="eico">📦</div><div class="etxt">Aucun article</div></div>'
+    : list.map(s=>{
+      const st=stState(s);
+      const cc=st==='critique'||st==='panne'?'critical':st==='bas'?'low':'ok';
+      const pct=s.type==='conso'?Math.min(100,Math.round(s.qty/(s.min*2)*100)):100;
+      const act=st==='panne'?'Résolu ✓':st==='critique'?'Commander':'Détails';
+      const badge=st==='panne'?`<span class="sbadge" style="background:var(--red-bg);color:var(--red)">PANNE</span>`:st==='critique'?`<span class="sbadge" style="background:var(--red-bg);color:var(--red)">CRITIQUE</span>`:st==='bas'?`<span class="sbadge" style="background:var(--orange-bg);color:var(--orange)">BAS</span>`:`<span class="sbadge s-actif">OK</span>`;
+      return `<div class="sc ${cc}"><div class="sc-top"><div class="sc-ico">${s.ico}</div><div class="sc-info"><div class="sc-name">${s.name}</div><div class="sc-cat">${s.cat}</div>${st==='panne'&&s.panne?`<div class="sc-cat" style="color:var(--red);margin-top:3px">⚠ ${s.panne}</div>`:''}</div>${badge}</div>${s.type==='conso'?`<div class="sc-bar-w"><div class="sc-bar" style="width:${pct}%"></div></div>`:''}<div class="sc-ft"><div class="sc-qty">${s.type==='conso'?`${s.qty} / ${s.min*2} ${s.unit}`:s.cat}</div><button class="sc-btn" onclick="stkAction(${s.id})">${act}</button></div></div>`;
+    }).join('');
+}
+
+function stkAction(id) {
+  const s=D.stocks.find(i=>i.id===id); if(!s)return;
+  if(stState(s)==='panne'){s.ok=true;s.panne='';save();renderStk();renderDash();}
+}
+
+// ═══════════════════════════════════
+// PIPELINE
+// ═══════════════════════════════════
+function renderPipe() {
+  let list=D.pipeline.filter(p=>F.pipe==='tous'||p.stage===F.pipe);
+  const tot=list.reduce((s,p)=>s+p.val,0);
+  const devis=list.filter(p=>p.stage==='devis').length;
+  const neg=list.filter(p=>p.stage==='négociation').length;
+  document.getElementById('pipeStats').innerHTML=`<div class="ps"><span class="psv">${(tot/1000).toFixed(1)}K€</span><div class="psl">Total</div></div><div class="psdiv"></div><div class="ps"><span class="psv">${devis}</span><div class="psl">Devis</div></div><div class="psdiv"></div><div class="ps"><span class="psv">${neg}</span><div class="psl">Négoc.</div></div>`;
+  const stCls={contact:'st1',devis:'st2',négociation:'st3',gagné:'st4'};
+  const stLbl={contact:'Contact',devis:'Devis',négociation:'Négoc.',gagné:'Gagné ✓',perdu:'Perdu'};
+  document.getElementById('pipeList').innerHTML=list.length===0
+    ? '<div class="empty"><div class="eico">📈</div><div class="etxt">Aucun prospect</div></div>'
+    : list.map(p=>`<div class="pc"><div class="pc-top"><div class="pc-info"><div class="pc-co">${p.co}</div><div class="pc-svc">${p.svc}</div>${p.note?`<div class="pc-note">💬 ${p.note}</div>`:''}</div><div class="pc-val">${p.val.toLocaleString('fr-FR')} €</div></div><div class="pc-ft"><div class="pc-last">🕐 ${p.last}</div><span class="stage ${stCls[p.stage]||'st1'}">${stLbl[p.stage]||p.stage}</span></div></div>`).join('');
+}
+
+// ═══════════════════════════════════
+// MODAL
+// ═══════════════════════════════════
+function openModal(id){document.getElementById(id).classList.add('open')}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+
+// ═══════════════════════════════════
+// AI
+// ═══════════════════════════════════
+function openAI(){document.getElementById('aiPanel').classList.add('open');document.getElementById('aiBd').classList.add('open');document.getElementById('aiFab').classList.add('hidden')}
+function closeAI(){document.getElementById('aiPanel').classList.remove('open');document.getElementById('aiBd').classList.remove('open');document.getElementById('aiFab').classList.remove('hidden')}
+
+function addMsg(role,txt) {
+  const c=document.getElementById('aiMsgs');
+  const d=document.createElement('div'); d.className='msg '+role;
+  d.innerHTML=`<div class="mb">${txt.replace(/\n/g,'<br>')}</div>`;
+  c.appendChild(d); c.scrollTop=c.scrollHeight; return d;
+}
+function showLoader(){
+  const c=document.getElementById('aiMsgs');
+  const d=document.createElement('div'); d.className='msg a'; d.id='aiLdr';
+  d.innerHTML='<div class="mb"><div class="dl"><div class="dd"></div><div class="dd"></div><div class="dd"></div></div></div>';
+  c.appendChild(d); c.scrollTop=c.scrollHeight;
+}
+function rmLoader(){const l=document.getElementById('aiLdr');if(l)l.remove()}
+
+function buildCtx() {
+  const crit=D.stocks.filter(s=>s.type==='conso'&&s.qty<s.min).map(s=>s.name).join(', ')||'aucun';
+  const pannes=D.stocks.filter(s=>s.type==='mat'&&!s.ok).map(s=>`${s.name}: ${s.panne||'panne'}`).join(' | ')||'aucune';
+  const urgents=D.interventions.filter(i=>i.status==='urgent').map(i=>`${i.cli} (${i.type})`).join(', ')||'aucune';
+  const hot=D.pipeline.filter(p=>p.stage==='négociation'||p.stage==='devis').map(p=>`${p.co} — ${p.val}€ (${p.stage})`).join(', ');
+  return `Tu es l'assistant stratégique de Tumasgiu Tumeo, 25 ans, président de ETS Group, basé en Corse (Alistro). Entités : Cintu Communication (agence web/print/branding, co-gérée avec Armand le père) + ETS Entretien (nettoyage résidentiel & espaces verts, gérée par Anne-Laure). Réponds en français. Direct, concis, actionnable. Pas de blabla.
+
+DONNÉES TEMPS RÉEL :
+Clients actifs : ${D.clients.filter(c=>c.status==='actif').length}
+Interventions planifiées : ${D.interventions.filter(i=>i.status==='planifié').length} | Urgentes : ${D.interventions.filter(i=>i.status==='urgent').length}
+Stocks critiques : ${crit}
+Pannes matériel : ${pannes}
+Urgences terrain : ${urgents}
+Pipeline Cintu : ${D.pipeline.length} prospects — ${(D.pipeline.reduce((s,p)=>s+p.val,0)/1000).toFixed(1)}K€ total
+Dossiers chauds : ${hot}`;
+}
+
+function demoAI(msg) {
+  const m=msg.toLowerCase();
+  if(m.includes('alert')||m.includes('priorit')) {
+    const c=D.stocks.filter(s=>s.type==='conso'&&s.qty<s.min), p=D.stocks.filter(s=>s.type==='mat'&&!s.ok);
+    return `🔴 Priorités immédiates :\n\n${c.length} stocks critiques : ${c.map(s=>s.name).join(', ')}\n\n🔧 ${p.length} pannes : ${p.map(s=>s.name).join(', ')}\n\nOrdre d'action :\n1. Commander stocks manquants\n2. Résoudre pannes matériel\n3. Relancer pipeline Cintu`;
+  }
+  if(m.includes('pipeline')||m.includes('relancer')) {
+    const hot=D.pipeline.filter(p=>p.stage==='négociation').sort((a,b)=>b.val-a.val);
+    return `📊 Relances prioritaires :\n\n${hot.map((p,i)=>`${i+1}. ${p.co} (${p.val}€)\n   → ${p.last}\n   💬 ${p.note}`).join('\n\n')}\n\nCommence par le plus gros contrat : ${hot[0]?.co} (${hot[0]?.val}€).`;
+  }
+  if(m.includes('email')||m.includes('relance mail')) {
+    const h=D.pipeline.filter(p=>p.stage==='négociation'||p.stage==='devis').sort((a,b)=>b.val-a.val)[0];
+    if(h) return `✉ Email pour ${h.co} :\n\nObjet : Suite à notre échange — ${h.svc}\n\nBonjour,\n\nJe reviens vers vous concernant ${h.svc.toLowerCase()}.\n\nNotre proposition est finalisée. Disponible pour un appel de 20 min cette semaine pour validation.\n\nCordialement,\nTumasgiu Tumeo\nCintu Communication`;
+  }
+  if(m.includes('stock')) {
+    const c=D.stocks.filter(s=>s.type==='conso'&&s.qty<s.min);
+    return `📦 Commander en urgence :\n\n${c.map(s=>`• ${s.name}\n  Stock : ${s.qty} ${s.unit} → min requis : ${s.min} ${s.unit}`).join('\n\n')}\n\nEstimation totale : 80–150€ selon fournisseur.`;
+  }
+  return `Mode démo actif. Pour activer l'IA complète :\n1. Obtiens ta clé API sur console.anthropic.com\n2. Colle-la dans const API_KEY au début du fichier\n\nEn attendant, je peux déjà analyser tes données avec les réponses préprogrammées — utilise les boutons de raccourci.`;
+}
+
+async function sendAI() {
+  const inp=document.getElementById('aiInp'), msg=inp.value.trim(); if(!msg)return;
+  inp.value=''; inp.style.height='auto';
+  addMsg('u',msg); aiHist.push({role:'user',content:msg});
+  document.getElementById('aiSend').disabled=true; showLoader();
+  if(!API_KEY){rmLoader();const r=demoAI(msg);addMsg('a',r);aiHist.push({role:'assistant',content:r});document.getElementById('aiSend').disabled=false;return;}
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':API_KEY,'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:buildCtx(),messages:aiHist.slice(-10)})});
+    const d=await res.json(); rmLoader();
+    const r=d.content?.[0]?.text||'Erreur API.'; addMsg('a',r); aiHist.push({role:'assistant',content:r});
+  }catch(e){rmLoader();addMsg('a','⚠ Connexion impossible. Vérifie ta clé API.');}
+  document.getElementById('aiSend').disabled=false;
+}
+
+function sendQ(t){document.getElementById('aiInp').value=t;sendAI()}
+
+// ═══════════════════════════════════
+// UTILS
+// ═══════════════════════════════════
+function fmtDate(d){if(!d)return'—';const dt=new Date(d);return dt.toLocaleDateString('fr-FR',{day:'numeric',month:'short'})}
+
+// ═══════════════════════════════════
+// PWA
+// ═══════════════════════════════════
+function initPWA(){
+  const m={name:"ETS Group CRM",short_name:"ETS Group",start_url:"./",display:"standalone",background_color:"#080810",theme_color:"#080810",icons:[{src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='40' fill='%23080810'/><text y='140' x='16' font-size='110' font-family='Georgia,serif' fill='%23C9A96E'>ET</text></svg>",sizes:"192x192",type:"image/svg+xml"}]};
+  const blob=new Blob([JSON.stringify(m)],{type:'application/json'});
+  const link=document.createElement('link');link.rel='manifest';link.href=URL.createObjectURL(blob);
+  document.head.appendChild(link);
+}
+
+// ═══════════════════════════════════
+// INIT
+// ═══════════════════════════════════
+document.addEventListener('DOMContentLoaded',()=>{
+  initHeader(); renderDash(); initPWA();
+});
+</script>
+</body>
+</html>
